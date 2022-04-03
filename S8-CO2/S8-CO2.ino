@@ -1,14 +1,26 @@
 #include <ESP8266WiFi.h>
 #include <SoftwareSerial.h>
+#include <ESP8266WiFiGeneric.h>
 
-#include <arduino_secrets.h>
 #include "arduino_secrets.h"
 
+// ****** TELEMETRY ****** //
 const char* ssid          = SECRET_SMARTHOME_WIFI_SSID;
 const char* password      = SECRET_SMARTHOME_WIFI_PASSWORD;
 
+WiFiClient client;
+
+// Pushover //
+String Token  = "your_Pushover_App_token";
+String User   = "your_Pushover_user_ID";
+int length;
+
+// ****** CO2 Sensor ****** //
+
+// CO2 Sensor defines //
 #define D7 (13)
 #define D8 (15)
+#define CO2_THRESHOLD 300
 
 SoftwareSerial s8Serial(D7, D8);
 
@@ -25,6 +37,8 @@ byte response_s8[7] = {0, 0, 0, 0, 0, 0, 0};
 
 const int r_len = 7;
 const int c_len = 8;
+
+// ****** Functions ****** //
 
 boolean wifi_reconnect() {
   Serial.printf("\nConnecting to %s ", ssid);
@@ -71,7 +85,7 @@ unsigned long s8Replay(byte rc_data[]) {
   return val; 
 }
 
-void co2_measure() {
+int co2_measure_smooth() {
   s8Request(cmd_s8);
   s8_co2 = s8Replay(response_s8);
   
@@ -82,7 +96,7 @@ void co2_measure() {
   s8_co2_mean2 = s8_co2_mean2 - smoothing_factor2*(s8_co2_mean2 - s8_co2);
 
   Serial.printf("CO2 value: %d, M1Value: %d, M2Value: %d\n", s8_co2, s8_co2_mean, s8_co2_mean2);
-  return;
+  return s8_co2_mean;
 }
 
 void get_abc() {
@@ -105,7 +119,43 @@ void setup() {
   get_abc();
 }
 
+byte pushover(char *pushovermessage) {
+ 
+  String Msg = pushovermessage;
+  length = 81 + Msg.length();
+    if (client.connect("api.pushover.net", 80)) {
+      Serial.println("Sending message…");
+      client.println("POST /1/messages.json HTTP/1.1");
+      client.println("Host: api.pushover.net");
+      client.println("Connection: close\r\nContent-Type: application/x-www-form-urlencoded");
+      client.print("Content-Length: ");
+      client.print(length);
+      client.println("\r\n");
+      client.print("token="+Token+"&user="+User+"&message="+Msg);
+      /* Uncomment this to receive a reply from Pushover server:
+      while(client.connected()) {
+        while(client.available()) {
+          char ch = client.read();
+          Serial.write(ch);
+        }
+      }
+      */
+      client.stop();
+      Serial.println("Done");
+      Serial.println("");
+      delay(100);
+    }
+}
+
 void loop() {
-  co2_measure();
+  int co2_mean = co2_measure_smooth();
+
+  if (co2_mean > CO2_THRESHOLD){
+    String po_co2_msg = String("Warning: CO2 value at " + co2_mean);
+    char charBuf[50];
+    po_co2_msg.toCharArray(charBuf, 50);
+    pushover(charBuf);
+  }
+  
   delay(10 * 1000L);
 }
