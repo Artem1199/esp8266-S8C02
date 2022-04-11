@@ -11,18 +11,23 @@ const char* password      = SECRET_SMARTHOME_WIFI_PASSWORD;
 WiFiClient client;
 
 // Pushover //
-String Token  = "your_Pushover_App_token";
-String User   = "your_Pushover_user_ID";
+String Token  = "affsqwrh74kwryx2yxv6rz4uxmpxs4";
+String User   = "umv3pw6khbwnswgv54bneo3o6wnmpz";
+const String MSG_ALARMTRIGGERED = "TEST ALARM TRIGGERED!";
+bool isSendPush = false;
+String pushParameters;
+bool TRIG_PIN = true;
+
 int length;
 
 // ****** CO2 Sensor ****** //
 
 // CO2 Sensor defines //
-#define D7 (13)
-#define D8 (15)
+//#define Rx ()
+//#define Tx ()
 #define CO2_THRESHOLD 300
 
-SoftwareSerial s8Serial(D7, D8);
+// SoftwareSerial s8Serial(Rx, Tx);
 
 int s8_co2;
 int s8_co2_mean;
@@ -41,41 +46,48 @@ const int c_len = 8;
 // ****** Functions ****** //
 
 boolean wifi_reconnect() {
-  Serial.printf("\nConnecting to %s ", ssid);
+  // Serial.printf("\nConnecting to %s ", ssid);
   WiFi.hostname("TestUnit");
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
-    Serial.print(".");
+    // Serial.print(".");
     delay(500);
   }
-  Serial.printf("\nConnected to the WiFi network: %s\n", ssid);
+  // Serial.printf("\nConnected to the WiFi network: %s\n", ssid);
+
   return true;
 }
 
+
 void s8Request(byte cmd[]) {
-  s8Serial.begin(9600);
-  while(!s8Serial.available()) {
-    s8Serial.write(cmd, c_len); 
+  PrimePushOver("Starting s8Request...");
+  UpdatePushServer();
+  Serial.begin(9600); // removed s8
+  while(!Serial.available()) { // removed s8
+    Serial.write(cmd, c_len); // removed s8 
     delay(50); 
   }
   int timeout=0;
-  while(s8Serial.available() < r_len ) {
+  while(Serial.available() < r_len ) { // removed s8
     timeout++; 
     if(timeout > 10) {
-      while(s8Serial.available()) {
-        s8Serial.read();
+      while(Serial.available()) { // removed s8
+        Serial.read(); // removed s8
         break;
       }
     } 
     delay(50); 
   } 
   for (int i=0; i < r_len; i++) { 
-    response_s8[i] = s8Serial.read(); 
+    response_s8[i] = Serial.read(); // removed s8 
   }
   
-  s8Serial.end();
+  Serial.end(); // removed s8
+
+ // PrimePushOver("Finished s8Request.");
+ // UpdatePushServer();
 }                     
 
 unsigned long s8Replay(byte rc_data[]) { 
@@ -95,67 +107,86 @@ int co2_measure_smooth() {
   if (!s8_co2_mean2) s8_co2_mean2 = s8_co2;
   s8_co2_mean2 = s8_co2_mean2 - smoothing_factor2*(s8_co2_mean2 - s8_co2);
 
-  Serial.printf("CO2 value: %d, M1Value: %d, M2Value: %d\n", s8_co2, s8_co2_mean, s8_co2_mean2);
+  // Serial.printf("CO2 value: %d, M1Value: %d, M2Value: %d\n", s8_co2, s8_co2_mean, s8_co2_mean2);
   return s8_co2_mean;
 }
 
 void get_abc() {
+  PrimePushOver("Starting get_abc()...");
+  UpdatePushServer();
   int abc_s8_time;
   s8Request(abc_s8);
   abc_s8_time = s8Replay(response_s8);
-
-  Serial.printf("ABC Time is: %d hours\n", abc_s8_time);
+  // Serial.printf("ABC Time is: %d hours\n", abc_s8_time);
   return;
 }
 
-void setup() {
-  Serial.begin(115200);
-  delay(10);
-
-  if(WiFi.status() != WL_CONNECTED) {
-    wifi_reconnect();
+void PrimePushOver(String Msg){
+  if (isSendPush == false)
+  // if (isSendPush == false && digitalRead(TRIG_PIN) == HIGH)
+  {
+      StartPushNotification(Msg);
   }
-
-  get_abc();
 }
 
-byte pushover(char *pushovermessage) {
- 
-  String Msg = pushovermessage;
-  length = 81 + Msg.length();
-    if (client.connect("api.pushover.net", 80)) {
-      Serial.println("Sending message…");
+void StartPushNotification(String message) {
+  // Form the string
+  pushParameters = "token="+Token+"&user="+User+"&message="+message;
+  isSendPush = true;
+  client.connect("api.pushover.net", 80);
+  //Serial.println("Connect to push server");
+}
+
+
+// Keep track of the push server connection status without holding 
+// up the code execution
+void UpdatePushServer(){
+    if(isSendPush == true && client.connected()) {
+      int length = pushParameters.length();
+      //Serial.println("Posting push notification: " + pushParameters);
       client.println("POST /1/messages.json HTTP/1.1");
       client.println("Host: api.pushover.net");
       client.println("Connection: close\r\nContent-Type: application/x-www-form-urlencoded");
       client.print("Content-Length: ");
       client.print(length);
       client.println("\r\n");
-      client.print("token="+Token+"&user="+User+"&message="+Msg);
-      /* Uncomment this to receive a reply from Pushover server:
-      while(client.connected()) {
-        while(client.available()) {
-          char ch = client.read();
-          Serial.write(ch);
-        }
-      }
-      */
+      client.print(pushParameters);
+
       client.stop();
-      Serial.println("Done");
-      Serial.println("");
-      delay(100);
+      isSendPush = false;
+      //Serial.println("Finished posting notification.");
     }
 }
 
-void loop() {
-  int co2_mean = co2_measure_smooth();
+void setup() {
+  // Serial.begin(115200);
+  delay(10);
 
-  if (co2_mean > CO2_THRESHOLD){
-    String po_co2_msg = String("Warning: CO2 value at " + co2_mean);
-    char charBuf[50];
-    po_co2_msg.toCharArray(charBuf, 50);
-    pushover(charBuf);
+  if(WiFi.status() != WL_CONNECTED) {
+    wifi_reconnect();
   }
+    PrimePushOver("Connected to Wifi...");
+    UpdatePushServer();
+  // Serial.print("Connecting to s8 sensor...");
+    get_abc();
+  // Serial.print("Finished setup");
+}
+
+void loop() {
+  
+  // pushover();
+  
+  int co2_mean_int = 0;
+  
+  co2_mean_int = co2_measure_smooth();
+  String co2_mean = String(co2_mean_int);
+  //if (co2_mean > CO2_THRESHOLD){
+    String po_co2_msg = String("Warning: CO2 value at " + co2_mean + " ppm.");
+    // char charBuf[50];
+    // po_co2_msg.toCharArray(charBuf, 50);
+    PrimePushOver(po_co2_msg);
+    UpdatePushServer();
+ // }
   
   delay(10 * 1000L);
 }
