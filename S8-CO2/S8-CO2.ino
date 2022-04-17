@@ -2,7 +2,8 @@
 #include <SoftwareSerial.h>
 #include <ESP8266WiFiGeneric.h>
 
-#include "arduino_secrets.h"
+// #include "arduino_secrets.h"
+#include "arduino_secrets_vav.h"
 
 // ****** TELEMETRY ****** //
 const char* ssid          = SECRET_SMARTHOME_WIFI_SSID;
@@ -25,7 +26,8 @@ int length;
 // CO2 Sensor defines //
 //#define Rx ()
 //#define Tx ()
-#define CO2_THRESHOLD 300
+int co2_ths_int = 400;
+String co2_ths;
 
 // SoftwareSerial s8Serial(Rx, Tx);
 
@@ -62,29 +64,29 @@ boolean wifi_reconnect() {
 
 
 void s8Request(byte cmd[]) {
-  PrimePushOver("Starting s8Request...");
-  UpdatePushServer();
-  Serial.begin(9600); // removed s8
-  while(!Serial.available()) { // removed s8
-    Serial.write(cmd, c_len); // removed s8 
+  // PrimePushOver("Starting s8Request...");
+  // UpdatePushServer();
+  Serial.begin(9600);
+  while(!Serial.available()) { 
+    Serial.write(cmd, c_len);  
     delay(50); 
   }
   int timeout=0;
-  while(Serial.available() < r_len ) { // removed s8
+  while(Serial.available() < r_len ) { 
     timeout++; 
     if(timeout > 10) {
-      while(Serial.available()) { // removed s8
-        Serial.read(); // removed s8
+      while(Serial.available()) { 
+        Serial.read(); 
         break;
       }
     } 
     delay(50); 
   } 
   for (int i=0; i < r_len; i++) { 
-    response_s8[i] = Serial.read(); // removed s8 
+    response_s8[i] = Serial.read();  
   }
   
-  Serial.end(); // removed s8
+  Serial.end(); 
 
  // PrimePushOver("Finished s8Request.");
  // UpdatePushServer();
@@ -104,11 +106,7 @@ int co2_measure_smooth() {
   if (!s8_co2_mean) s8_co2_mean = s8_co2;
   s8_co2_mean = s8_co2_mean - smoothing_factor*(s8_co2_mean - s8_co2);
   
-  if (!s8_co2_mean2) s8_co2_mean2 = s8_co2;
-  s8_co2_mean2 = s8_co2_mean2 - smoothing_factor2*(s8_co2_mean2 - s8_co2);
-
-  // Serial.printf("CO2 value: %d, M1Value: %d, M2Value: %d\n", s8_co2, s8_co2_mean, s8_co2_mean2);
-  return s8_co2_mean;
+   return s8_co2_mean;
 }
 
 void get_abc() {
@@ -154,14 +152,13 @@ void UpdatePushServer(){
 
       client.stop();
       isSendPush = false;
-      //Serial.println("Finished posting notification.");
     }
 }
 
 void setup() {
-  // Serial.begin(115200);
-  delay(10);
 
+  co2_ths = String(co2_ths_int);
+  
   if(WiFi.status() != WL_CONNECTED) {
     wifi_reconnect();
   }
@@ -172,21 +169,25 @@ void setup() {
   // Serial.print("Finished setup");
 }
 
+int read_counter = 0;  // read more often than checking sensor
 void loop() {
   
   // pushover();
   
   int co2_mean_int = 0;
-  
+
+  read_counter += 1;
   co2_mean_int = co2_measure_smooth();
-  String co2_mean = String(co2_mean_int);
-  //if (co2_mean > CO2_THRESHOLD){
-    String po_co2_msg = String("Warning: CO2 value at " + co2_mean + " ppm.");
-    // char charBuf[50];
-    // po_co2_msg.toCharArray(charBuf, 50);
-    PrimePushOver(po_co2_msg);
-    UpdatePushServer();
- // }
+
+  if (read_counter > 1){
+    read_counter = 0;
+    if (co2_mean_int > co2_ths_int){
+      String co2_mean = String(co2_mean_int);
+      String po_co2_msg = String("Warning: CO2 value at " + co2_mean + " ppm (Threshold: " + co2_ths + " ppm).");
+      PrimePushOver(po_co2_msg);
+      UpdatePushServer();
+     }
+  }
   
-  delay(10 * 1000L);
+  delay(2 * 1000L);
 }
