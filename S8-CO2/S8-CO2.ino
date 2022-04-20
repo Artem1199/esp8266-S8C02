@@ -1,15 +1,28 @@
 #include <ESP8266WiFi.h>
 #include <SoftwareSerial.h>
 #include <ESP8266WiFiGeneric.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#include <stdint.h>
+#include "iot_iconset_16x16.h"
 
-// #include "arduino_secrets.h"
-#include "arduino_secrets_vav.h"
+// ****** LCD Setup ****** //
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 32 // OLED display height, in pixels
+
+#define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
+#define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+#include "arduino_secrets.h"
+// #include "arduino_secrets_vav.h"
 
 // ****** TELEMETRY ****** //
 const char* ssid          = SECRET_SMARTHOME_WIFI_SSID;
 const char* password      = SECRET_SMARTHOME_WIFI_PASSWORD;
 
 WiFiClient client;
+bool wifi_on = false;
 
 // Pushover //
 String Token  = "affsqwrh74kwryx2yxv6rz4uxmpxs4";
@@ -26,7 +39,7 @@ int length;
 // CO2 Sensor defines //
 //#define Rx ()
 //#define Tx ()
-int co2_ths_int = 400;
+int co2_ths_int = 1000;
 String co2_ths;
 
 // SoftwareSerial s8Serial(Rx, Tx);
@@ -36,7 +49,6 @@ int s8_co2_mean;
 int s8_co2_mean2;
 
 float smoothing_factor = 0.5;
-float smoothing_factor2 = 0.15;
 
 byte cmd_s8[]       = {0xFE, 0x04, 0x00, 0x03, 0x00, 0x01, 0xD5, 0xC5};
 byte abc_s8[]       = {0xFE, 0x03, 0x00, 0x1F, 0x00, 0x01, 0xA1, 0xC3};
@@ -47,21 +59,57 @@ const int c_len = 8;
 
 // ****** Functions ****** //
 
-boolean wifi_reconnect() {
+void wifi_reconnect() {
   // Serial.printf("\nConnecting to %s ", ssid);
+  scrolltextwifi();
+  
   WiFi.hostname("TestUnit");
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
 
+  int conn_retry = 0;
+ 
   while (WiFi.status() != WL_CONNECTED) {
     // Serial.print(".");
     delay(500);
+    conn_retry += 1;
+    if (conn_retry > 20){
+      wifi_on = false;
+      display.stopscroll();
+      delay(1000);
+      display.clearDisplay();
+      display.setCursor(10, 0);
+      display.println(F("Connection to WiFi/nfailed"));
+      display.display();
+      delay(1000);
+      break;
+    }
   }
-  // Serial.printf("\nConnected to the WiFi network: %s\n", ssid);
 
-  return true;
+  if (WiFi.status() == WL_CONNECTED){
+      wifi_on = true;
+      display.stopscroll();
+      delay(1000);
+      display.clearDisplay();
+      display.setCursor(10, 0);
+      display.println(F("Connection to WiFi/nsuccessful"));
+      display.display();
+      delay(1000);
+  }
+  return;
 }
 
+void scrolltextwifi(void){
+  display.clearDisplay();
+
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(10, 0);
+  String ssid_String = "Connecting to \n" + String(ssid) + "...";
+  display.println(ssid_String);
+  display.display();
+  display.startscrollleft(0x00, 0x0F);
+}
 
 void s8Request(byte cmd[]) {
   // PrimePushOver("Starting s8Request...");
@@ -157,7 +205,30 @@ void UpdatePushServer(){
 
 void setup() {
 
-  co2_ths = String(co2_ths_int);
+  // I2C setup for LCD
+  Wire.begin(2,0);
+  
+  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
+  if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
+    Serial.println(F("SSD1306 allocation failed"));
+    for(;;); // Don't proceed, loop forever
+  }
+
+  // Show initial display buffer contents on the screen --
+  // the library initializes this with an Adafruit splash screen.
+  display.display();
+  delay(2000); // Pause for 2 seconds
+
+  // Clear the buffer
+  display.clearDisplay();
+  
+  // Draw a single pixel in white
+  display.drawPixel(10, 10, SSD1306_WHITE);
+  display.display(); // .display() must be called if you want to display the image
+  delay(2000); 
+  
+  co2_ths = String(co2_ths_int);  // co2 convert to string, not sure if needed
+
   
   if(WiFi.status() != WL_CONNECTED) {
     wifi_reconnect();
@@ -169,6 +240,18 @@ void setup() {
   // Serial.print("Finished setup");
 }
 
+void displayreadings(String co2_mean, int co2_mean_int){
+  display.clearDisplay();
+  display.setTextSize(2.5);
+  display.setCursor(0,10);
+  display.println(co2_mean + " ppm");
+  if (wifi_on){
+      display.drawBitmap(110, 10, wifiOn, 16, 16, 1);
+  } else {
+    display.drawBitmap(110, 10, wifiOff, 16, 16, 1);
+  }
+  display.display();
+}
 int read_counter = 0;  // read more often than checking sensor
 void loop() {
   
@@ -178,11 +261,12 @@ void loop() {
 
   read_counter += 1;
   co2_mean_int = co2_measure_smooth();
+  String co2_mean = String(co2_mean_int);
+  displayreadings(co2_mean, co2_mean_int);
 
   if (read_counter > 1){
     read_counter = 0;
-    if (co2_mean_int > co2_ths_int){
-      String co2_mean = String(co2_mean_int);
+    if ((co2_mean_int > co2_ths_int) && wifi_on){
       String po_co2_msg = String("Warning: CO2 value at " + co2_mean + " ppm (Threshold: " + co2_ths + " ppm).");
       PrimePushOver(po_co2_msg);
       UpdatePushServer();

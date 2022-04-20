@@ -1,0 +1,407 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title "S8-CO2 Sensor"
+Date "2022-04-16"
+Rev "1.0"
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L ESP8266:ESP-01v090 DB3
+U 1 1 625AD472
+P 5650 3850
+F 0 "DB3" H 5650 4365 50  0000 C CNN
+F 1 "ESP-01v090" H 5650 4274 50  0000 C CNN
+F 2 "ESP8266:ESP-01" H 5650 3850 50  0001 C CNN
+F 3 "http://l0l.org.uk/2014/12/esp8266-modules-hardware-guide-gotta-catch-em-all/" H 5650 3850 50  0001 C CNN
+	1    5650 3850
+	1    0    0    -1  
+$EndComp
+$Comp
+L mc33269:MC33269 VR1
+U 1 1 625B06B3
+P 9400 2450
+F 0 "VR1" H 9300 3237 60  0000 C CNN
+F 1 "MC33269" H 9300 3131 60  0000 C CNN
+F 2 "Package_TO_SOT_THT:TO-220F-3_Horizontal_TabDown" H 9400 2450 60  0001 C CNN
+F 3 "" H 9400 2450 60  0000 C CNN
+	1    9400 2450
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:+3.3V #PWR0101
+U 1 1 625B2CAB
+P 4500 3800
+F 0 "#PWR0101" H 4500 3650 50  0001 C CNN
+F 1 "+3.3V" H 4515 3973 50  0000 C CNN
+F 2 "" H 4500 3800 50  0001 C CNN
+F 3 "" H 4500 3800 50  0001 C CNN
+	1    4500 3800
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6600 3700 7250 3700
+$Comp
+L power:GND #PWR0102
+U 1 1 625B51AF
+P 8400 4200
+F 0 "#PWR0102" H 8400 3950 50  0001 C CNN
+F 1 "GND" H 8405 4027 50  0000 C CNN
+F 2 "" H 8400 4200 50  0001 C CNN
+F 3 "" H 8400 4200 50  0001 C CNN
+	1    8400 4200
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0103
+U 1 1 625B59D1
+P 7250 3700
+F 0 "#PWR0103" H 7250 3450 50  0001 C CNN
+F 1 "GND" H 7255 3527 50  0000 C CNN
+F 2 "" H 7250 3700 50  0001 C CNN
+F 3 "" H 7250 3700 50  0001 C CNN
+	1    7250 3700
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:+3.3V #PWR0104
+U 1 1 625B6F6B
+P 9900 2050
+F 0 "#PWR0104" H 9900 1900 50  0001 C CNN
+F 1 "+3.3V" H 9915 2223 50  0000 C CNN
+F 2 "" H 9900 2050 50  0001 C CNN
+F 3 "" H 9900 2050 50  0001 C CNN
+	1    9900 2050
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4500 4000 4500 3800
+Wire Wire Line
+	7800 3700 7550 3700
+Wire Wire Line
+	7550 3700 7550 4000
+Wire Wire Line
+	7550 4000 6600 4000
+$Comp
+L power:+3.3V #PWR0105
+U 1 1 625BB834
+P 7650 5000
+F 0 "#PWR0105" H 7650 4850 50  0001 C CNN
+F 1 "+3.3V" H 7665 5173 50  0000 C CNN
+F 2 "" H 7650 5000 50  0001 C CNN
+F 3 "" H 7650 5000 50  0001 C CNN
+	1    7650 5000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7650 5150 7650 5000
+Wire Wire Line
+	7700 3800 7800 3800
+$Comp
+L Sensor_Gas_2:004-0-0053 DB4
+U 1 1 625AE47E
+P 8400 3800
+F 0 "DB4" H 8400 4381 50  0000 C CNN
+F 1 "004-0-0053" H 8400 4290 50  0000 C CNN
+F 2 "SenseAirS8:Senseair_S8_Up" H 8400 3800 50  0001 C CNN
+F 3 "https://rmtplusstoragesenseair.blob.core.windows.net/docs/publicerat/PSP126.pdf" H 8400 3800 50  0001 C CNN
+	1    8400 3800
+	1    0    0    -1  
+$EndComp
+$Comp
+L S8-CO2-Sensor-KiCAD-rescue:SSD1306BOB-SSD1306_OLED-0.91-128x32 DS1
+U 1 1 625B0CB2
+P 8200 4800
+F 0 "DS1" H 9028 4551 50  0000 L CNN
+F 1 "SSD1306BOB" H 9028 4460 50  0000 L CNN
+F 2 "kbd:OLED" H 8200 4800 50  0001 C CNN
+F 3 "" H 8200 4800 50  0001 C CNN
+	1    8200 4800
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0106
+U 1 1 625B1C2D
+P 7650 5250
+F 0 "#PWR0106" H 7650 5000 50  0001 C CNN
+F 1 "GND" H 7655 5077 50  0000 C CNN
+F 2 "" H 7650 5250 50  0001 C CNN
+F 3 "" H 7650 5250 50  0001 C CNN
+	1    7650 5250
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7650 5150 8100 5150
+Wire Wire Line
+	8100 5250 7650 5250
+Wire Wire Line
+	6600 3800 6850 3800
+Wire Wire Line
+	6600 3900 6850 3900
+Wire Wire Line
+	8100 4950 7900 4950
+Wire Wire Line
+	8100 5050 7900 5050
+Text Label 7900 4950 0    50   ~ 0
+SDA
+Text Label 6850 3800 0    50   ~ 0
+SDA
+Text Label 6850 3900 0    50   ~ 0
+SCL
+Text Label 7900 5050 0    50   ~ 0
+SCL
+$Comp
+L Battery_Management:03962A DB1
+U 1 1 625C7147
+P 4650 1800
+F 0 "DB1" H 5075 1875 50  0000 C CNN
+F 1 "03962A" H 5075 1784 50  0000 C CNN
+F 2 "TP4056:TP4056-18650" H 4650 1800 50  0001 C CNN
+F 3 "" H 4650 1800 50  0001 C CNN
+	1    4650 1800
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5600 1950 5700 1950
+Wire Wire Line
+	5600 2250 5600 2550
+Wire Wire Line
+	4550 2250 4550 2550
+Connection ~ 4550 2550
+Wire Wire Line
+	4550 2550 5600 2550
+$Comp
+L power:GND #PWR0107
+U 1 1 625CAC4D
+P 4550 2550
+F 0 "#PWR0107" H 4550 2300 50  0001 C CNN
+F 1 "GND" H 4555 2377 50  0000 C CNN
+F 2 "" H 4550 2550 50  0001 C CNN
+F 3 "" H 4550 2550 50  0001 C CNN
+	1    4550 2550
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:Battery_Cell LION1
+U 1 1 625CB43C
+P 5850 2250
+F 0 "LION1" H 5968 2346 50  0000 L CNN
+F 1 "3.7V BAT" H 5968 2255 50  0000 L CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" V 5850 2310 50  0001 C CNN
+F 3 "~" V 5850 2310 50  0001 C CNN
+	1    5850 2250
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:Battery_Cell LION2
+U 1 1 625CCE9B
+P 6450 2250
+F 0 "LION2" H 6568 2346 50  0000 L CNN
+F 1 "3.7V BAT" H 6568 2255 50  0000 L CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" V 6450 2310 50  0001 C CNN
+F 3 "~" V 6450 2310 50  0001 C CNN
+	1    6450 2250
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5600 2050 5850 2050
+Connection ~ 5850 2050
+Wire Wire Line
+	5850 2050 6450 2050
+Wire Wire Line
+	5600 2150 5650 2150
+Wire Wire Line
+	5650 2150 5650 2350
+Wire Wire Line
+	5650 2350 5850 2350
+Connection ~ 5850 2350
+Wire Wire Line
+	5850 2350 6450 2350
+Wire Wire Line
+	8400 3400 8400 3250
+$Comp
+L power:+5V #PWR0108
+U 1 1 625D0A88
+P 8400 3250
+F 0 "#PWR0108" H 8400 3100 50  0001 C CNN
+F 1 "+5V" H 8415 3423 50  0000 C CNN
+F 2 "" H 8400 3250 50  0001 C CNN
+F 3 "" H 8400 3250 50  0001 C CNN
+	1    8400 3250
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4700 3800 4500 3800
+Connection ~ 4500 3800
+Wire Wire Line
+	4500 4000 4700 4000
+$Comp
+L Converter_DCDC:XL6019 DB2
+U 1 1 625DAE97
+P 7600 1900
+F 0 "DB2" H 7925 1925 50  0000 C CNN
+F 1 "XL6019" H 7925 1834 50  0000 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical" H 7600 1900 50  0001 C CNN
+F 3 "" H 7600 1900 50  0001 C CNN
+	1    7600 1900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5600 2550 7500 2550
+Wire Wire Line
+	7500 2550 7500 2300
+Connection ~ 5600 2550
+Wire Wire Line
+	7500 2550 8350 2550
+Wire Wire Line
+	8350 2550 8350 2300
+Connection ~ 7500 2550
+Wire Wire Line
+	9300 2550 8350 2550
+Connection ~ 8350 2550
+Wire Wire Line
+	8700 2050 8700 1700
+Wire Wire Line
+	8700 1700 7500 1700
+Wire Wire Line
+	7500 1700 7500 2100
+Wire Wire Line
+	7500 1700 5700 1700
+Wire Wire Line
+	5700 1700 5700 1950
+Connection ~ 7500 1700
+$Comp
+L power:+5V #PWR0109
+U 1 1 625EBE97
+P 8350 2100
+F 0 "#PWR0109" H 8350 1950 50  0001 C CNN
+F 1 "+5V" H 8365 2273 50  0000 C CNN
+F 2 "" H 8350 2100 50  0001 C CNN
+F 3 "" H 8350 2100 50  0001 C CNN
+	1    8350 2100
+	1    0    0    -1  
+$EndComp
+Wire Notes Line
+	10150 1500 10150 2850
+Wire Notes Line
+	10150 2850 3600 2850
+Wire Notes Line
+	3600 2850 3600 1500
+Wire Notes Line
+	3600 1500 10150 1500
+Text Notes 9100 2800 0    50   ~ 0
+Supply & Battery Circuit
+Wire Notes Line
+	10150 2950 10150 5550
+Wire Notes Line
+	10150 5550 4250 5550
+Wire Notes Line
+	4250 5550 4250 2950
+Wire Notes Line
+	4250 2950 10150 2950
+Text Notes 8950 5500 0    50   ~ 0
+ESP-01, S8 Senseair & LCD
+Wire Wire Line
+	4550 1950 4500 1950
+Wire Wire Line
+	4500 1950 4500 1900
+$Comp
+L power:VCC #PWR0110
+U 1 1 625FE2AF
+P 4500 1900
+F 0 "#PWR0110" H 4500 1750 50  0001 C CNN
+F 1 "VCC" H 4515 2073 50  0000 C CNN
+F 2 "" H 4500 1900 50  0001 C CNN
+F 3 "" H 4500 1900 50  0001 C CNN
+	1    4500 1900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7700 3150 4700 3150
+Wire Wire Line
+	4700 3150 4700 3700
+Wire Wire Line
+	7700 3150 7700 3800
+$Comp
+L Mechanical:MountingHole_Pad H1
+U 1 1 6261C4CA
+P 10350 2550
+F 0 "H1" V 10304 2700 50  0000 L CNN
+F 1 "MountingHole_Pad" V 10395 2700 50  0000 L CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3_Pad_Via" H 10350 2550 50  0001 C CNN
+F 3 "~" H 10350 2550 50  0001 C CNN
+	1    10350 2550
+	0    1    1    0   
+$EndComp
+$Comp
+L Mechanical:MountingHole_Pad H2
+U 1 1 6261FD9D
+P 10350 2750
+F 0 "H2" V 10304 2900 50  0000 L CNN
+F 1 "MountingHole_Pad" V 10395 2900 50  0000 L CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3_Pad_Via" H 10350 2750 50  0001 C CNN
+F 3 "~" H 10350 2750 50  0001 C CNN
+	1    10350 2750
+	0    1    1    0   
+$EndComp
+$Comp
+L Mechanical:MountingHole_Pad H3
+U 1 1 6262074D
+P 10350 2950
+F 0 "H3" V 10304 3100 50  0000 L CNN
+F 1 "MountingHole_Pad" V 10395 3100 50  0000 L CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3_Pad_Via" H 10350 2950 50  0001 C CNN
+F 3 "~" H 10350 2950 50  0001 C CNN
+	1    10350 2950
+	0    1    1    0   
+$EndComp
+$Comp
+L Mechanical:MountingHole_Pad H4
+U 1 1 6262118D
+P 10350 3150
+F 0 "H4" V 10304 3300 50  0000 L CNN
+F 1 "MountingHole_Pad" V 10395 3300 50  0000 L CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3_Pad_Via" H 10350 3150 50  0001 C CNN
+F 3 "~" H 10350 3150 50  0001 C CNN
+	1    10350 3150
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	10250 3150 10250 2950
+Connection ~ 10250 2750
+Wire Wire Line
+	10250 2750 10250 2550
+Connection ~ 10250 2950
+Wire Wire Line
+	10250 2950 10250 2750
+$Comp
+L power:GND #PWR01
+U 1 1 62622570
+P 10250 3150
+F 0 "#PWR01" H 10250 2900 50  0001 C CNN
+F 1 "GND" H 10255 2977 50  0000 C CNN
+F 2 "" H 10250 3150 50  0001 C CNN
+F 3 "" H 10250 3150 50  0001 C CNN
+	1    10250 3150
+	1    0    0    -1  
+$EndComp
+Connection ~ 10250 3150
+$Comp
+L power:GND #PWR0111
+U 1 1 6264F096
+P 5850 2350
+F 0 "#PWR0111" H 5850 2100 50  0001 C CNN
+F 1 "GND" H 5855 2177 50  0000 C CNN
+F 2 "" H 5850 2350 50  0001 C CNN
+F 3 "" H 5850 2350 50  0001 C CNN
+	1    5850 2350
+	1    0    0    -1  
+$EndComp
+$EndSCHEMATC
